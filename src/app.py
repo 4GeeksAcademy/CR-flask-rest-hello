@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Favorites, Characters, Planets
 #from models import Person
 
 app = Flask(__name__)
@@ -46,6 +46,85 @@ def handle_hello():
     return jsonify(response_body), 200
 
 # this only runs if `$ python src/app.py` is executed
+if __name__ == '__main__':
+    PORT = int(os.environ.get('PORT', 3000))
+    app.run(host='0.0.0.0', port=PORT, debug=False)
+
+@app.route("/user", methods = ["POST"])
+def create_user():
+    user = User()
+    body = request.get_json()
+    user.email = body["email"]
+    user.password = body["password"]
+    user.is_active = body["is_active"]
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(user.serialize()), 200
+
+@app.route("/user", methods = ["GET"])
+def get_users(): 
+    users = User.query.all()
+    all_users = list(map(lambda x: x.serialize(), users))
+
+    return jsonify(all_users), 200
+
+@app.route("/user/favorites", methods = ["GET"])
+def get_favorites(): 
+    favorites = Favorites.query.all()
+    all_favorites = list(map(lambda x: x.serialize(), favorites))
+
+    return jsonify(all_favorites), 200
+
+@app.route("/character/", methods = ["GET"])
+def get_characters():
+    characters = Characters.query.all()
+    all_characters = list(map(lambda x: x.serialize(), favorites))
+
+    return jsonify(all_characters), 200
+
+@app.route("/character/<int:character_id>", methods = ["GET"])
+def get_character(character_id):
+        character = Character.query.get(character_id)
+
+        return jsonify(character.serialize()), 200
+
+@app.route("/planet/", methods = ["GET"])
+def get_planet():
+    planet = Planet.query.all()
+    all_planet = list(map(lambda x: x.serialize(), favorites))
+
+    return jsonify(all_characters), 200
+
+@app.route("/planets/<int:planets_id>", methods = ["GET"])
+def get_planet(planet_id):
+        planets = Planet.query.get(planets_id)
+
+        return jsonify(planets.serialize()), 200
+
+@app.route("/favorites/character/<int:character_id>", methods = ["POST"])
+def create_favorite_character(character_id): 
+    favorite_character = Favorite(user_id = request.get_json()["user_id"], favorite_character_id = character_id)
+    db.session.add(favorite_character)
+    db.session.commit()
+    
+    return jsonify("Character Have Been Added to Favorites")
+
+@app.route('/user/<int:user_id>/favorites/planet/<int:planet_id>', methods={'DELETE'})
+def delete_favorite_planet(user_id ,planet_id):
+    favorite_user_planet = Favorites.query.filter_by(user_id = user_id, favorite_planet_id = planet_id).first()
+    if favorite_user_planet is None:
+        return jsonify("Could not find favorite planet")
+    db.session.delete(favorite_user_planet)
+    return jsonify("deleted"), 200
+
+@app.route('/user/<int:user_id>/favorites/character/<int:character_id>', methods={'DELETE'})
+def delete_favorite_character(user_id, character_id):
+    favorite_user_character = Favorites.query.filter_by(user_id = user_id, favorite_character_id = character_id).first()
+    if favorite_user_character is None:
+        return jsonify("Could not find favorite character")
+    db.session.delete(favorite_user_character)
+    return jsonify("deleted"), 200
+
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)
