@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
+    __tablename__= "User"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
@@ -23,15 +24,19 @@ class Favorites(db.Model):
     favorite_character_id = db.Column(db.Integer,db.ForeignKey("Character.id"))
     favorite_planet_id = db.Column(db.Integer,db.ForeignKey("Planet.id"))
     user_id = db.Column(db.Integer,db.ForeignKey("User.id"))
-    user = db.relationship("User",foreign_keys = [user_id])
-    favorite_character = db.relationship("Characters",foreign_keys = [favorite_character_id])
-    favorite_planet = db.relationship("Planet",foreign_keys = [favorite_planet_id])
+
+    def serialize(self):
+        return {
+            "favorites_character_id": self.favorite_character_id,
+            "favorite_planet_id": self.favorite_planet_id,
+            "user_id": self.user_id
+        }
 
 class Characters(db.Model):
     __tablename__ = "Character"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.string(120))
-    description = db.Column(db.string(120))
+    name = db.Column(db.String(120))
+    description = db.Column(db.String(120))
 
     def serialize(self):
         return {
@@ -43,8 +48,8 @@ class Characters(db.Model):
 class Planets(db.Model):
     __tablename__ = "planet"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.string(120))
-    description = db.Column(db.string(120))
+    name = db.Column(db.String(120))
+    description = db.Column(db.String(120))
 
     def serialize(self):
         return {

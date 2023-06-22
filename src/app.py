@@ -78,32 +78,32 @@ def get_favorites():
 @app.route("/character/", methods = ["GET"])
 def get_characters():
     characters = Characters.query.all()
-    all_characters = list(map(lambda x: x.serialize(), favorites))
+    all_characters = list(map(lambda x: x.serialize(), characters))
 
     return jsonify(all_characters), 200
 
 @app.route("/character/<int:character_id>", methods = ["GET"])
 def get_character(character_id):
-        character = Character.query.get(character_id)
+        character = Characters.query.get(character_id)
 
         return jsonify(character.serialize()), 200
 
 @app.route("/planet/", methods = ["GET"])
 def get_planet():
-    planet = Planet.query.all()
-    all_planet = list(map(lambda x: x.serialize(), favorites))
+    planets = Planets.query.all()
+    all_planets = list(map(lambda x: x.serialize(), planets))
 
-    return jsonify(all_characters), 200
+    return jsonify(all_planets), 200
 
 @app.route("/planets/<int:planets_id>", methods = ["GET"])
 def get_planet(planet_id):
-        planets = Planet.query.get(planets_id)
+        planets = Planets.query.get(planet_id)
 
         return jsonify(planets.serialize()), 200
 
 @app.route("/favorites/character/<int:character_id>", methods = ["POST"])
 def create_favorite_character(character_id): 
-    favorite_character = Favorite(user_id = request.get_json()["user_id"], favorite_character_id = character_id)
+    favorite_character = Favorites(user_id = request.get_json()["user_id"], favorite_character_id = character_id)
     db.session.add(favorite_character)
     db.session.commit()
     
